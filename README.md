@@ -1,56 +1,77 @@
 # blobtools_tutorial
 
-A practical guide to blobtools
+A practical guide to BlobTools
 
-## what is blobtools?
+## why use BlobTools?
 
-Blobtools was created by [Laetsch DR and Blaxter ML, 2017.](https://f1000research.com/articles/6-1287/v1) \
-The current release is found [here.](https://zenodo.org/badge/latestdoi/23453/DRL/blobtools) \
-This guide will follow "Workflow A" in the [manual](https://blobtools.readme.io/docs/what-is-blobtools), providing example code at each step.
+BlobTools allows taxonomic partitioning of metagenome or metatranscriptome assemblies, without requiring reference genomes. Using GC content, read coverage, and taxonomy, it can visualize how much genetic information in the assembly comes from a host species versus members of its microbiome. 
 
-Blobtools allows for taxonomic partitioning of metagenomes or metatranscriptomes, without requiring reference genomes.
+The example dataset here includes the metatranscriptome of an octocoral host and its associated *Symbiodinium* endosymbionts, during a heat stress experiment. 
 
-## what input files does it require?
+BlobTools was created by [Laetsch DR and Blaxter ML, 2017.](https://f1000research.com/articles/6-1287/v1) The current release is found [here.](https://zenodo.org/badge/latestdoi/23453/DRL/blobtools)
 
-First, we will create a blobplot using just one set of trimmed paired reads: \
+This guide follows "Workflow A" in the [manual](https://blobtools.readme.io/docs/what-is-blobtools), providing example code and explanations at each step.
 
-coral_1.fq.gz
-coral_2.fq.gz
+## what input files? trimmed paired reads
 
-After the base name, 1 refers to forward reads, and 2 refers to reverse reads. \
+After running Trimmomatic to trim the reads, rename the paired reads as:
 
-Run Trinity to assemble these trimmed paired reads. The resulting metatranscriptome represents an octocoral holobiont, and is expected to contain genetic information both from the _Sympodium sp._ host and its endosymbiotic zooxanthellae.
+After the base name, list an array number, followed by a 1 (forward read) or 2 (reverse read).
 
-Trinity_holobiont_metatranscriptome.fasta
+This example will use two sets of trimmed paired reads:
+```
+coral_1_1.fq.gz \
+coral_1_2.fq.gz
 
-## run bwa-mem to align the trimmed paired reads to the holobiont transcriptome
+coral_2_1.fq.gz \
+coral_2_2.fq.gz 
+```
+Record which array numbers correspond to which experimental conditions. Here, coral_1 experiences control conditions, while coral_2 experiences thermal stress. 
 
-### index the metatranscriptome assembly
-bwa index Trinity_holobiont_metatranscriptome.fasta
+Then, run Trinity to assemble these trimmed paired reads, generating this assembly:
+```
+holobiont.fasta
+```
+The resulting holobiont metatranscriptome assembly is expected to contain genetic information from the coral host and its endosymbionts. 
 
-### map reads to the assembly as an array
-
+We will use PBS scripts to allow for PBS arrays. Many of these commands can also be run as loops. Unless otherwise indicated, all PBS scripts below will have these flags:
+```
 #!/bin/bash
 #PBS -V \
-#PBS -N bwa_mem_array \
+#PBS -N job_name \
 #PBS -q batch \
 #PBS -S /bin/bash \
 #PBS -l nodes=1:ppn=8 \
 #PBS -l mem=10G \
 #PBS -l walltime=48:00:00 \
-#PBS -o /error_logs/bwa_mem_array.out \
-#PBS -e /error_logs/bwa_mem_array.err \
+#PBS -o /error_logs/job_name.out \
+#PBS -e /error_logs/job_name.err \
 #PBS -J 1-2 \
+```
 
-mkdir -p /results/alignments
-cd /results/alignments
+## bwa-mem to align trimmed paired reads to the assembly
 
-### first, align the reads
+### index the assembly
+```
+bwa index holobiont.fasta
+```
+
+Use a PBS script to run read mapping as an array
+
+### read mapping
+move into an output folder
+```
+mkdir -p /alignments
+cd /alignments
+```
+first, align the reads
+```
 bwa mem -t 8 -HM -k 19 -w 100 -d 100 -R "@RG\tID:${PBS_ARRAY_INDEX}\tSM:${PBS_ARRAY_INDEX}\tLB:${PBS_ARRAY_INDEX}\tPL:ILLUMINA" \
-/nas5/dpierro/data/assemblies/Trinity_holobiont_metatranscriptome.fasta \
-/nas5/dpierro/data/trimmed_paired_reads_renamed/coral_${PBS_ARRAY_INDEX}_1.fq.gz \
-/nas5/dpierro/data/trimmed_paired_reads_renamed/coral_${PBS_ARRAY_INDEX}_2.fq.gz \
+holobiont.fasta \
+coral_${PBS_ARRAY_INDEX}_1.fq.gz \
+coral_${PBS_ARRAY_INDEX}_2.fq.gz \
 > coral_${PBS_ARRAY_INDEX}_toHolobiont_bwamem.sam &&
+```
 
 samtools view -@ 8 -bS -o coral_${PBS_ARRAY_INDEX}_toHolobiont_bwamem.sam_bam \
 coral_${PBS_ARRAY_INDEX}_toHolobiont_bwamem.sam &&
