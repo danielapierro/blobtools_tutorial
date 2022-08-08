@@ -98,11 +98,7 @@ samtools flagstat coral_${PBS_ARRAY_INDEX}_toHolobiont_bwamem.bam
 
 Several methods for installing BlobTools can be found [here](https://github.com/DRL/blobtools)
 
-Upload this file
-```
-blob.txt
-```
-Create a conda environment using blob.txt
+Upload ```blob.txt``` and use it to create a conda environment
 ```
 conda create --name blobtools --file blob.txt
 ```
@@ -163,14 +159,15 @@ perl splitFASTA.pl -i holobiont.fasta -o /split_holobiont/ -s 10000
 ```
 Run blastn as an array job. 
 
-Specify ```#PBS -J 1-n``` such that n = the number of files that splitFASTA split the assembly into.
-Make sure ```#PBS -l nodes=1:ppn=8``` matches the number of threads in the blastn command ```-num_threads 8```
-Ensure that blast is updated to the most recent version with ```conda update blast```
-
 Download the blast nt database locally (shown here) or if possible, use a remote search
 
+Troubleshoot:\
+Specify ```#PBS -J 1-n``` such that n = the number of files that splitFASTA split the assembly into.\
+Make sure ```#PBS -l nodes=1:ppn=8``` matches the number of threads in the blastn command ```-num_threads 8``` \
+Ensure that blast is updated to the most recent version with ```conda update blast```
+
 ```
-cd /fullpathsplit_holobiont/
+cd /fullpath/split_holobiont/
 
 blastn -query holobiont-${PBS_ARRAY_INDEX}.fasta
 -db /database/nt.oct.19.2021/nt -outfmt '6 qseqid staxids bitscore std'
