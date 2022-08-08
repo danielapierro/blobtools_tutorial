@@ -48,8 +48,8 @@ This tutorial will use PBS scripts to allow for PBS arrays. Many of these comman
 #PBS -J 1-2
 ```
 
-## run bwa-mem
-### to align trimmed paired reads to the assembly
+## Burrows-Wheeler Alignment
+### run BWA-MEM to align trimmed paired reads to the assembly
 
 ### index the assembly
 ```
