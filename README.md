@@ -210,15 +210,19 @@ for i in {1..4}; do blobtools view -i /fullpath/blob_db/coral_${i}_toHolobiont_b
 
 create a blobplot of one individual file (for instance, array number 1)
 ```
-blobtools plot -i coral_1_toHolobiont_blob.DB.blobDB.json --nohit --rank phylum --taxrule bestsum --format pdf --out coral1.phylum
+blobtools plot -i coral_1_toHolobiont_blob.DB.blobDB.json 
+--nohit --rank phylum --taxrule bestsum --format pdf --out coral1.phylum
 ```
 create a blobplot for all files. 
 change {1..n} depending on how many array numbers you have in total
 since this may take several hours, running it in a screen is highly recommended
 ```
-for i in {1..4}; do blobtools plot -i /home/dpierro/nas5/results/blob_db/coral_${i}_toHolobiont_blob.DB.blobDB.json --nohit --rank phylum --taxrule bestsum --format pdf --out phylum_$i; done
+for i in {1..4}; do blobtools plot -i /fullpath/blob_db/coral_${i}_toHolobiont_blob.DB.blobDB.json 
+--nohit --rank phylum --taxrule bestsum --format pdf --out phylum_$i; done
 ```
 In specifying taxonomic rank (--rank), note that BlobTools supports superkingdom, phylum, order, family, genus, and species, but does *not* support class, kingdom, or domain.
+
+If working on a remote server, use rsync or scp to copy the pdf output onto your local device to see your blobplots!
 
 ## good luck!
 
