@@ -96,4 +96,37 @@ samtools flagstat coral_${PBS_ARRAY_INDEX}_toHolobiont_bwamem.bam
 ```
 ## install BlobTools
 
-It can be helpful to create a conda environment for blobtools.
+Several methods for installing BlobTools can be found [here](https://github.com/DRL/blobtools)
+
+Upload this file
+```
+blob.txt
+```
+Create a conda environment using blob.txt
+```
+conda create --name blobtools --file blob.txt
+```
+Install the dependencies
+```
+conda activate blobtools
+conda install -n blobtools matplotlib 
+conda install -n blobtools docopt 
+conda install -n blobtools tqdm 
+conda install -n blobtools wget 
+conda install -n blobtools pyyaml 
+conda install -n blobtools git
+conda install -n blobtools pysam --update-deps 
+```
+in your equivalent of the folder containing the conda environment blobtools, cd into the data directory 
+/envs/blobtools/lib/python3.9/site-packages/data
+and get then taxdump
+```
+wget -c ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz 
+tar -zxvf taxdump.tar.gz
+```
+then copy the data diretory into the blobtools directory
+```
+cp -r /home/conda/envs/blobtools/lib/python3.9/site-packages/data/ /home/conda/envs/blobtools/
+
+
+
